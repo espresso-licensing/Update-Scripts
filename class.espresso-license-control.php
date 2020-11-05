@@ -12,11 +12,11 @@
  */
 class EspressoLicenseControl{
 
-	function __construct( $api_key, $product_key ){
+	function __construct( $license_key, $product_key ){
 
-		$this->api_key = $api_key;
+		$this->api_key = $license_key;
 		$this->product_key = $product_key;
-		$this->license_server = 'https://app.espressolicensing.com/wp-json/espresso-licensing/v1/';
+		$this->license_server = 'https://app.espressolicensing.com/wp-json/wp-updatr/v1/';
 
 		add_action( 'init', array( $this, 'setup_updates' ) );
 		add_action( 'admin_init', array( $this, 'updating_plugins' ) );
@@ -44,56 +44,58 @@ class EspressoLicenseControl{
 		}
 
 		// get addon information
-		$addon = $this->verify_product( $args->slug );
+		$addon = $this->verify_license();
 
-		// no addons?
+		// no response?
 		if ( empty( $addon ) ) {
 			return $api;
 		}
 
-		// handled by wordpress.org?
-		// if ( empty( $addon['License'] ) || $addon['License'] == 'wordpress.org' ) {
-		// 	return $api;
-		// }
-
 		// Create a new stdClass object and populate it with our plugin information.
-		$api = $this->plugin_api_object( $addon );
+		$api = $this->build_plugin_api_object( $addon );
+
 		return $api;
+	
 	}
 
-	function verify_product( $slug = '' ){
+	function verify_license(){
 
 		$args = array(
-			'api_key' => $this->api_key,
+			'license_key' => $this->api_key,
 			'product_key' => $this->product_key,
-			'slug' => $slug
 		);
 
-		$request = wp_remote_post( $this->license_server.'verify-product-key/', array( 'body' => $args ) );
+		$request = wp_remote_post( $this->license_server.'verify-license/', array( 'body' => $args ) );
 		
-// var_dump($request);
 		$response = json_decode( wp_remote_retrieve_body( $request ) );
 
-		$addon = array();
-		// var_dump($response);
-		if( !is_wp_error( $response ) ){
+		if( !$response ){
+			return;
+		}
+
+		$product = array();
+
+		if( !is_wp_error( $response ) && is_object( $response ) ){
 
 			if( intval( $response->status ) === 1 ){
 
-				$addon['Name'] = isset( $response->Name ) ? $response->Name : '';
-				$addon['Slug'] = isset( $response->Slug ) ? $response->Slug : '';
-				$addon['plugin'] = isset( $response->plugin ) ? $response->plugin : '';
-				$addon['Version'] = isset( $response->Version ) ? $response->Version : '';
-				$addon['Author'] = isset( $response->Author ) ? $response->Author : '';
-				$addon['AuthorURI'] = isset( $response->AuthorURI ) ? $response->AuthorURI : '';
-				$addon['Requires'] = isset( $response->Requires ) ? $response->Requires : '';
-				$addon['Tested'] = isset( $response->Tested ) ? $response->Tested : '';
-				$addon['LastUpdated'] = isset( $response->LastUpdated ) ? $response->LastUpdated : '';
-				$addon['URI'] = isset( $response->URI ) ? $response->URI : '';
-				$addon['Download'] = isset( $response->Download ) ? $response->Download : '';
-				$addon['Download'] = isset( $response->Download ) ? $response->Download : '';
+				$product['Name'] = isset( $response->Name ) ? $response->Name : '';
+				$product['Slug'] = isset( $response->Slug ) ? $response->Slug : '';
+				$product['plugin'] = isset( $response->plugin ) ? $response->plugin : '';
+				$product['Version'] = isset( $response->Version ) ? $response->Version : '';
+				$product['Author'] = isset( $response->Author ) ? $response->Author : '';
+				$product['AuthorURI'] = isset( $response->AuthorURI ) ? $response->AuthorURI : '';
+				$product['Requires'] = isset( $response->Requires ) ? $response->Requires : '';
+				$product['Tested'] = isset( $response->Tested ) ? $response->Tested : '';
+				$product['LastUpdated'] = isset( $response->LastUpdated ) ? $response->LastUpdated : '';
+				$product['URI'] = isset( $response->URI ) ? $response->URI : '';
+				$product['Download'] = isset( $response->Download ) ? $response->Download : '';
+				$product['Description'] = ( !empty( $response->Description ) ) ? $response->Description : "";
+				$product['Installation'] = ( !empty( $response->Installation ) ) ? $response->Installation : "";
+				$product['FAQ'] = ( !empty( $response->FAQ ) ) ? $response->FAQ : "";
+				$product['Changelog'] = ( !empty( $response->Changelog ) ) ? $response->Changelog : "";
 
-				return $addon;
+				return $product;
 			}
 		}
 
@@ -106,10 +108,10 @@ class EspressoLicenseControl{
 	 *
 	 * @since  1.8.5
 	 */
-	function plugin_api_object( $addon ) {
+	function build_plugin_api_object( $addon ) {
 		$api                        = new stdClass();
 
-		var_dump($addon);
+		// var_dump($addon);
 		if ( empty( $addon ) ) {
 			return $api;
 		}
@@ -135,21 +137,18 @@ class EspressoLicenseControl{
 		$api->sections['changelog'] = ( !empty( $addon['Changelog'] ) ) ? $addon['Changelog'] : "";
 
 		//carry on here
-		// get license key if one is available
-		$key = get_option( 'espresso_licensing_license_key', '' );
-		//temp
-		$api->download_link = add_query_arg( 'key', $key, $api->download_link );
+		$api->download_link = add_query_arg( 'key', $this->api_key, $api->download_link );
 
 		if ( ! empty( $key ) && ! empty( $api->download_link ) ) {
-			$api->download_link = add_query_arg( 'key', $key, $api->download_link );
+			$api->download_link = add_query_arg( 'key', $this->api_key, $api->download_link );
 		}
 		if ( ! empty( $key ) && ! empty( $api->package ) ) {
-			$api->package = add_query_arg( 'key', $key, $api->package );
+			$api->package = add_query_arg( 'key', $this->api_key, $api->package );
 		}
 		if ( empty( $api->upgrade_notice ) 
-			&& ! $this->verify_product() 
+			&& ! $this->verify_license() 
 		) {
-			$api->upgrade_notice = __( 'Important: This plugin requires a valid espresso Plus license key to update.', 'espresso' );
+			$api->upgrade_notice = __( 'Important: This plugin requires a valid license key', 'espresso' );
 		}
 
 		return $api;
@@ -206,7 +205,7 @@ class EspressoLicenseControl{
 
 			$slug = str_replace( '.php', '', basename( $plugin ) );
 			$addon = $this->get_product_by_slug( $slug );
-			if ( ! empty( $addon ) && ! $this->verify_product( ) ) {
+			if ( ! empty( $addon ) && ! $this->verify_license( ) ) {
 				require_once( ABSPATH . 'wp-admin/admin-header.php' );
 
 				echo '<div class="wrap"><h2>' . __( 'Update Plugin' ) . '</h2>';
@@ -265,9 +264,8 @@ class EspressoLicenseControl{
 			return $value;
 		}
 
-		// get addon information
-		$addon = $this->verify_product();
-	var_dump($addon);
+		$addon = $this->verify_license();
+	// var_dump($addon);
 		// no addons?
 		if ( empty( $addon ) ) {
 			return $value;
@@ -279,30 +277,30 @@ class EspressoLicenseControl{
 			if ( empty( $addon['License'] ) || $addon['License'] == 'wordpress.org' ) {
 				// continue;
 			}
-
+			$this->update_plugin_cache( '', '' );//remove when done
 			// get data for plugin
 			$plugin_file = $addon['Slug'] . '/' . $addon['Slug'] . '.php';
 			$plugin_file_abs = WP_PLUGIN_DIR . '/' . $plugin_file;
-
+// var_dump($plugin_file_abs);
 			// couldn't find plugin, skip
 			if ( ! file_exists( $plugin_file_abs ) ) {
 				// continue;
 			} else {
 				$plugin_data = get_plugin_data( $plugin_file_abs, false, true );
 			}
-var_dump($plugin_data);
+// var_dump($plugin_data);
 // exit();
-var_dump( $plugin_data['Version']);
+// var_dump( $plugin_data['Version']);
 			// compare versions
 			if (
 			 // ! empty( $addon['License'] ) && 
 				version_compare( $plugin_data['Version'], $addon['Version'], '<' ) ) {
 				var_dump('aaa');
-				$value->response[ $plugin_file ] = $this->plugin_api_object( $addon );
+				$value->response[ $plugin_file ] = $this->build_plugin_api_object( $addon );
 				$value->response[ $plugin_file ]->new_version = $addon['Version'];
 			} else {
 				var_dump('bbb');
-				$value->no_update[ $plugin_file ] = $this->plugin_api_object( $addon );
+				$value->no_update[ $plugin_file ] = $this->build_plugin_api_object( $addon );
 			}
 		// }
 
@@ -359,7 +357,7 @@ var_dump( $plugin_data['Version']);
 			$timeout = apply_filters( 'espresso_licensing_get_addons_timeout', 5 );
 
 			// get em
-			$remote_addons = $this->verify_product();
+			$remote_addons = $this->verify_license();
 	// var_dump($remote_addons);
 			// make sure we have at least an array to pass back
 			if ( empty( $addons ) ) {
@@ -427,7 +425,7 @@ var_dump( $plugin_data['Version']);
 			'api_key' => $this->api_key
 		);
 
-		$request = wp_remote_post( $this->license_server.'validate_api/', array( 'body' => $args ) );
+		$request = wp_remote_get( 'https://app.espressolicensing.com/wp-json/espressolicensing/v1/validate_api/', array( 'body' => $args ) );
 
 		$response = json_decode( wp_remote_retrieve_body( $request ) );
 
