@@ -425,7 +425,7 @@ class EspressoLicenseControl{
 			'api_key' => $this->api_key
 		);
 
-		$request = wp_remote_get( 'https://app.espressolicensing.com/wp-json/espressolicensing/v1/validate_api/', array( 'body' => $args ) );
+		$request = wp_remote_get( 'https://app.espressolicensing.com/wp-json/wp-updatr/v1/validate_api/', array( 'body' => $args ) );
 
 		$response = json_decode( wp_remote_retrieve_body( $request ) );
 
