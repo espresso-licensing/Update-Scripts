@@ -3,14 +3,17 @@
  * WP Updatr Plugin Update Script
  * Include this script in your plugin and initialize the class in your plugin's root file. 
  *
- * new WPUpdatrLicenseControl( $customer_api_key, $product_key );
+ * new WPUpdatrPlugins( $customer_api_key, $product_key );
  *
  * Version 1.0.0
  * 
  * Some of this code has been borrowed from Paid Memberships Pro
  * https://github.com/strangerstudios/paid-memberships-pro/
  */
-class WPUpdatrLicenseControl{
+
+namespace WPUpdatrPlugins;
+
+class WPUpdatrPlugins{
 
 	function __construct( $license_key, $product_key ){
 
@@ -134,7 +137,7 @@ class WPUpdatrLicenseControl{
 	 * Convert the format from the espresso_licensing_getAddons function to that needed for plugins_api
 	 */
 	function build_plugin_api_object( $addon ) {
-		$api                        = new stdClass();
+		$api                        = new \stdClass();
 
 		// var_dump($addon);
 		if ( empty( $addon ) ) {

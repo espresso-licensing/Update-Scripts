@@ -12,11 +12,14 @@ This update script requires you to have registered an account on [WP Updatr](htt
 Include the `class.plugin-wp-updatr.php` file at the top of your plugin's core file.
 
 ```php
-require_once plugin_dir_path( __FILE__ ).'class.plugin-wp-updatr.php';
+if( !class_exists('WPUpdatrPlugins') ){
+  require_once plugin_dir_path( __FILE__ ).'class.plugin-wp-updatr.php';
+}
 ```
-Instantiate the WPUpdatrLicenseControl Class with your customer's `$license_key` and `$product_key`
+Instantiate the WPUpdatrLicenseControl Class with your customer's `$license_key` and `$product_key`. Make use of namespacing to ensure that no conflicts arise between your plugin and others. Change `myPluginAlias` to something unique to your plugin. 
 ```php
-new WPUpdatrLicenseControl( $license_key, $product_key );
+use WPUpdatrPlugins as myPluginAlias;
+new myPluginAlias\WPUpdatrPlugins( $license_key, $product_key );
 ```
 ## License Key
 
@@ -27,7 +30,8 @@ You will need to build in a 'Settings' or 'API Key' field in your plugin to stor
 The easiest steps would be to save it in an `update_option` so that you initialize the code as follows: 
 
 ```php
-new WPUpdatrLicenseControl( get_option( 'myplugin_api_key' ), $product_key );
+use WPUpdatrPlugins as myPluginAlias;
+new myPluginAlias\WPUpdatrPlugins( get_option( 'myplugin_api_key' ), $product_key );
 ```
 ## Product Key
 
@@ -36,7 +40,8 @@ new WPUpdatrLicenseControl( get_option( 'myplugin_api_key' ), $product_key );
 This value will be hard coded and should not be changed once your plugin is released to your customers. This key is prefixed with `ELP-` and will look similar to this: 
 
 ```php
-new WPUpdatrLicenseControl( get_option( 'myplugin_api_key' ), 'ELP-' );
+use WPUpdatrPlugins as myPluginAlias;
+new myPluginAlias\WPUpdatrPlugins( get_option( 'myplugin_api_key' ), 'ELP-' );
 ```
 
 ## Verify Your Setup
@@ -46,7 +51,8 @@ Run a test purchase through your website to obtain a customer API key for yourse
 To verify if your API key is valid and paired to the correct product, run the following: 
 
 ```php
-$license = new WPUpdatrLicenseControl( get_option( 'myplugin_api_key`, 'ELP-' );
+use WPUpdatrPlugins as myPluginAlias;
+$license = new myPluginAlias\WPUpdatrPlugins( get_option( 'myplugin_api_key`, 'ELP-' );
 
 $object = $license->verify_license();
 
