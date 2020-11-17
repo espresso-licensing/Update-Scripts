@@ -16,7 +16,7 @@ if( !class_exists('WPUpdatrPlugins') ){
   require_once plugin_dir_path( __FILE__ ).'class.plugin-wp-updatr.php';
 }
 ```
-Instantiate the WPUpdatrLicenseControl Class with your customer's `$license_key` and `$product_key`. Make use of namespacing to ensure that no conflicts arise between your plugin and others. Change `myPluginAlias` to something unique to your plugin. 
+Instantiate the WPUpdatrPlugins Class with your customer's `$license_key` and `$product_key`. Make use of namespacing to ensure that no conflicts arise between your plugin and others. Change `myPluginAlias` to something unique to your plugin. 
 ```php
 use WPUpdatrPlugins as myPluginAlias;
 new myPluginAlias\WPUpdatrPlugins( $license_key, $product_key );
