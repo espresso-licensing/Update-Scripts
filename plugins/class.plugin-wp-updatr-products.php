@@ -164,6 +164,9 @@ class WPUpdatrPlugins{
 		$api->sections['faq'] = ( !empty( $addon['FAQ'] ) ) ? $addon['FAQ'] : "";
 		$api->sections['changelog'] = ( !empty( $addon['Changelog'] ) ) ? $addon['Changelog'] : "";
 
+		$api->icons = array( '1x' => ( !empty( $addon['icon'] ) ) ? $addon['icon'] : "" );
+		$api->banners = array( 'low' => ( !empty( $addon['banner'] ) ) ? $addon['banner'] : "" );
+		
 		//carry on here
 		$api->download_link = add_query_arg( 'key', $this->api_key, $api->download_link );
 
