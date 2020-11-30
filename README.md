@@ -19,6 +19,7 @@ if( !class_exists('WPUpdatrPlugins') ){
 Instantiate the WPUpdatrPlugins Class with your customer's `$license_key` and `$product_key`. Make use of namespacing to ensure that no conflicts arise between your plugin and others. Change `myPluginAlias` to something unique to your plugin. 
 ```php
 use WPUpdatrPlugins as myPluginAlias;
+
 new myPluginAlias\WPUpdatrPlugins( $license_key, $product_key );
 ```
 ## License Key
@@ -31,6 +32,7 @@ The easiest steps would be to save it in an `update_option` so that you initiali
 
 ```php
 use WPUpdatrPlugins as myPluginAlias;
+
 new myPluginAlias\WPUpdatrPlugins( get_option( 'myplugin_api_key' ), $product_key );
 ```
 ## Product Key
@@ -41,6 +43,7 @@ This value will be hard coded and should not be changed once your plugin is rele
 
 ```php
 use WPUpdatrPlugins as myPluginAlias;
+
 new myPluginAlias\WPUpdatrPlugins( get_option( 'myplugin_api_key' ), 'ELP-' );
 ```
 
@@ -49,6 +52,9 @@ new myPluginAlias\WPUpdatrPlugins( get_option( 'myplugin_api_key' ), 'ELP-' );
 Include the below snippet in your theme's `functions.php` file. The `$api_key` and `$product_key` variables will function the same as when used in a plugin.
 
 ```php
+
+use WPUpdatrThemes as myThemeAlias;
+
 function my_wp_updatr_theme_license() {
   
   require( get_stylesheet_directory() . '/class.theme-wp-updatr.php' ); 
