@@ -44,6 +44,27 @@ use WPUpdatrPlugins as myPluginAlias;
 new myPluginAlias\WPUpdatrPlugins( get_option( 'myplugin_api_key' ), 'ELP-' );
 ```
 
+## Usage - Themes
+
+Include the below snippet in your theme's `functions.php` file. The `$api_key` and `$product_key` variables will function the same as when used in a plugin.
+
+```php
+function my_wp_updatr_theme_license() {
+  
+  require( get_stylesheet_directory() . '/class.theme-wp-updatr.php' ); 
+
+  /**
+   * $api_key - Customer API Key they receive after making a purchase
+   * $product_key - Obtained from your WP Updatr Dashboard for that specific product
+   */
+
+  $theme = new myThemeAlias\WPUpdatrLicenseControlThemes( $api_key, $product_key );
+
+  // $license = $theme->verify_license();
+
+}
+add_action( 'after_setup_theme', 'my_wp_updatr_theme_license' );
+```
 ## Verify Your Setup
 
 Run a test purchase through your website to obtain a customer API key for yourself. Include that in your plugin's API key field and set your product API key. 
