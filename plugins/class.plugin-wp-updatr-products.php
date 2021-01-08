@@ -5,7 +5,7 @@
  *
  * new WPUpdatrPlugins( $customer_api_key, $product_key );
  *
- * Version 1.0.0
+ * Version 1.0.1
  * 
  * Some of this code has been borrowed from Paid Memberships Pro
  * https://github.com/strangerstudios/paid-memberships-pro/
@@ -206,9 +206,13 @@ class WPUpdatrPlugins{
 			$product = $this->verify_license();
 
 			foreach ( $plugins as $plugin ) {
-				$slug = str_replace( '.php', '', basename( $plugin ) );				
-				if ( $product['status'] == 0 && !empty( $product['Slug'] ) && $product['Slug'] == $slug ) {
-					$wpupdatr_plugins[] = $plugin;
+				$slug = str_replace( '.php', '', basename( $plugin ) );	
+				if( !empty( $product['status'] ) ){			
+					if ( $product['status'] == 0 && !empty( $product['Slug'] ) ) {
+						if( $product['Slug'] == $slug ){
+							$wpupdatr_plugins[] = $plugin;
+						}
+					}
 				}
 			}			
 
@@ -233,23 +237,31 @@ class WPUpdatrPlugins{
 
 			$slug = str_replace( '.php', '', basename( $plugin ) );
 			
-			if ( $product['status'] == 0 && !empty( $product['Slug'] ) && $product['Slug'] == $slug ) {
+			$slug = str_replace( '.php', '', basename( $plugin ) );	
 
-				require_once( ABSPATH . 'wp-admin/admin-header.php' );
+			if( !empty( $product['status'] ) ){			
+				if ( $product['status'] == 0 && !empty( $product['Slug'] ) ) {
+					if( $product['Slug'] == $slug ){
 
-				echo '<div class="wrap"><h2>' . __( 'Update Plugin' ) . '</h2>';
+						require_once( ABSPATH . 'wp-admin/admin-header.php' );
 
-				$msg = __( 'You must have a valid license key to update this plugin.', 'espresso' );
-				
-				echo '<div class="error"><p>' . $msg . '</p></div>';				
+						echo '<div class="wrap"><h2>' . __( 'Update Plugin' ) . '</h2>';
 
-				echo '</div>';
+						$msg = __( 'You must have a valid license key to update this plugin.', 'espresso' );
+						
+						echo '<div class="error"><p>' . $msg . '</p></div>';				
 
-				include( ABSPATH . 'wp-admin/admin-footer.php' );
+						echo '</div>';
 
-				// can exit WP now
-				exit;
+						include( ABSPATH . 'wp-admin/admin-footer.php' );
+
+						// can exit WP now
+						exit;
+
+					}
+				}
 			}
+				
 		}
 
 		// updating via AJAX on the plugins page
@@ -261,13 +273,17 @@ class WPUpdatrPlugins{
 			
 			$product = $this->verify_license();
 
-			if ( $product['status'] == 0 && !empty( $product['Slug'] ) && $product['Slug'] == $slug ) {
+			if( !empty( $product['status'] ) ){			
+				if ( $product['status'] == 0 && !empty( $product['Slug'] ) ) {
+					if( $product['Slug'] == $slug ){
 
-				$msg = __( 'You must have a valid license key to update this plugin.', 'espresso' );
-				echo '<div class="error"><p>' . $msg . '</p></div>';
+						$msg = __( 'You must have a valid license key to update this plugin.', 'espresso' );
+						echo '<div class="error"><p>' . $msg . '</p></div>';
 
-				// can exit WP now
-				exit;
+						// can exit WP now
+						exit;
+					}
+				}
 			}
 		}
 
